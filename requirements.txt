@@ -140,3 +140,6 @@ wrapt==1.17.2
 xai-sdk==0.3.0
 yarl==1.18.3
 yt-dlp==2025.6.25
+fastapi
+uvicorn
+
