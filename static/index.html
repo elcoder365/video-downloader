@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="app_title_short">تنزيل الفيديو</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+       <style>
+    /* الخط الأساسي للتطبيق */
+    body {
+        font-family: 'Inter', sans-serif;
+        direction: rtl; /* لضبط اتجاه النص من اليمين لليسار */
+        text-align: right; /* لمحاذاة النص لليمين */
+        background-color: #f0f2f5; /* لون خلفية فاتح وناعم */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh; /* تأكد من أن الجسم يملأ الشاشة بالكامل */
+        padding: 1rem; /* إضافة بعض المساحة حول المحتوى */
+    }
+    /* تعديل اتجاه النص للغة الإنجليزية */
+    [lang="en"] body {
+        direction: ltr;
+        text-align: left;
+    }
+
+    /* أنماط الحاوية الرئيسية */
+    .main-container {
+        background-color: #ffffff;
+        padding: 2.5rem; /* زيادة المساحة الداخلية */
+        border-radius: 1.5rem; /* زوايا دائرية أكبر */
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* ظل أقوى وأكثر انتشارًا */
+        width: 100%;
+        max-width: 900px; /* زيادة أقصى عرض للحاوية */
+        transition: all 0.3s ease-in-out; /* انتقال سلس عند أي تغيير */
+    }
+    .main-container:hover {
+        transform: translateY(-3px); /* رفع خفيف عند التمرير */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); /* ظل أكبر عند التمرير */
+    }
+
+    /* أنماط شريط التقدم المخصص باستخدام DIV */
+    .custom-progress-bar-container {
+        width: 100%;
+        height: 25px; /* ارتفاع أكبر */
+        background-color: #e0e7ff; /* لون أزرق فاتح للخلفية */
+        border-radius: 9999px; /* rounded-full */
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* ظل داخلي */
+    }
+    .custom-progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(to right, #4a90e2, #2563eb); /* تدرج لوني جميل */
+        border-radius: 9999px;
+        transition: width 0.5s ease-out; /* انتقال أبطأ وأكثر سلاسة */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* تحسينات لأزرار الإجراءات */
+    .action-btn {
+        padding: 0.8rem 1.8rem; /* مساحة داخلية أكبر */
+        border-radius: 0.75rem; /* زوايا دائرية أكثر */
+        font-size: 1.1rem; /* خط أكبر قليلاً */
+        font-weight: 700; /* خط أثقل */
+        transition: all 0.3s ease-in-out; /* انتقال لجميع الخصائص */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* ظل للأزرار */
+        text-transform: uppercase; /* تحويل النص إلى أحرف كبيرة */
+        letter-spacing: 0.05em; /* تباعد الأحرف */
+    }
+    .action-btn:hover {
+        transform: translateY(-2px); /* رفع خفيف عند التمرير */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* ظل أكبر عند التمرير */
+        opacity: 0.9; /* شفافية خفيفة */
+    }
+
+    /* أزرار محددة */
+    .bg-blue-600.hover\:bg-blue-700 {
+        background-color: #3b82f6; /* أزرق أفتح قليلاً */
+    }
+    .bg-green-600.hover\:bg-green-700 {
+        background-color: #22c55e; /* أخضر أكثر حيوية */
+    }
+    .bg-red-600.hover\:bg-red-700 {
+        background-color: #ef4444; /* أحمر أكثر حيوية */
+    }
+
+    /* أنماط حقول الإدخال والقوائم المنسدلة */
+    input[type="text"], select {
+        padding: 0.75rem 1rem; /* مساحة داخلية أكبر */
+        border-radius: 0.75rem; /* زوايا دائرية أكثر */
+        border: 1px solid #cbd5e1; /* لون حدود ناعم */
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05); /* ظل داخلي خفيف */
+        transition: all 0.3s ease-in-out;
+    }
+    input[type="text"]:focus, select:focus {
+        border-color: #3b82f6; /* لون أزرق عند التركيز */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* ظل تركيز أزرق */
+        outline: none; /* إزالة الخطوط العريضة الافتراضية */
+    }
+
+    /* أنماط الصورة المصغرة للفيديو */
+    #videoThumbnail {
+        border-radius: 1rem; /* زوايا دائرية */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* ظل خفيف */
+        margin-top: 1.5rem;
+    }
+
+    /* تلميح الأداة */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 220px; /* عرض أكبر قليلاً */
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 8px; /* زوايا دائرية أكثر */
+        padding: 8px 10px; /* مساحة داخلية أكبر */
+        position: absolute;
+        z-index: 1;
+        top: 125%; 
+        right: 50%;
+        transform: translateX(50%);
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; /* انتقال أكثر سلاسة */
+        font-size: 0.85rem; /* خط أكبر قليلاً */
+        line-height: 1.4;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل للتلميح */
+    }
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 8px; /* حجم أكبر للسهم */
+        border-style: solid;
+        border-color: transparent transparent #333 transparent;
+    }
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(50%) translateY(-5px); /* رفع خفيف عند الظهور */
+    }
+
+    /* أنماط قسم التواصل الجديد */
+    .contact-card {
+        background-color: #ffffff;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        padding: 2.5rem;
+        margin-top: 2rem;
+        text-align: center;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+    .contact-icon-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.9rem 2rem; /* مساحة داخلية أكبر */
+        background-color: #e0f2fe; /* أزرق فاتح جداً */
+        border-radius: 9999px;
+        color: #1e40af; /* أزرق داكن */
+        font-weight: 600;
+        transition: all 0.3s ease-in-out;
+        text-decoration: none;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); /* ظل خفيف */
+    }
+    .contact-icon-link:hover {
+        background-color: #bfdbfe; /* أزرق أغمق قليلاً عند التمرير */
+        color: #1c3d8a; /* أزرق أغمق عند التمرير */
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .contact-icon-link i {
+        font-size: 1.6rem; /* حجم أيقونة أكبر */
+        margin-left: 0.8rem; /* مسافة بين الأيقونة والنص */
+    }
+    [lang="en"] .contact-icon-link i {
+        margin-right: 0.8rem;
+        margin-left: 0;
+    }
+
+    /* أنماط مربع الدردشة AI */
+    .ai-chat-box {
+        position: fixed;
+        bottom: 1.5rem; /* مسافة أكبر من الأسفل */
+        right: 1.5rem; /* مسافة أكبر من اليمين */
+        width: 350px; /* عرض أكبر قليلاً */
+        height: 500px; /* ارتفاع أكبر قليلاً */
+        background-color: #ffffff;
+        border-radius: 1rem; /* زوايا دائرية أكثر */
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25); /* ظل أقوى */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1000;
+        transition: all 0.3s ease-in-out;
+        transform-origin: bottom right; /* نقطة الأصل للتحويل */
+    }
+    .ai-chat-box.hidden {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px); /* تصغير واختفاء */
+        pointer-events: none; /* تعطيل التفاعل عند الإخفاء */
+    }
+    .ai-chat-box:not(.hidden) {
+        opacity: 1;
+        transform: scale(1) translateY(0); /* ظهور وتكبير */
+        pointer-events: auto;
+    }
+
+    .ai-chat-header {
+        background-color: #2563eb;
+        color: white;
+        padding: 0.9rem 1.2rem; /* مساحة داخلية أكبر */
+        font-weight: bold;
+        font-size: 1.1rem; /* خط أكبر */
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .ai-chat-messages {
+        flex-grow: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef; /* خط فاصل خفيف */
+    }
+    .ai-chat-message {
+        margin-bottom: 0.8rem; /* مسافة سفلية أكبر */
+        padding: 0.6rem 0.9rem; /* مساحة داخلية أكبر */
+        border-radius: 0.75rem; /* زوايا دائرية أكثر */
+        max-width: 85%;
+        word-wrap: break-word; /* لضمان التفاف النص الطويل */
+        line-height: 1.4;
+    }
+    .ai-chat-message.user {
+        background-color: #dbeafe; /* blue-100 */
+        margin-right: auto;
+        margin-left: 0;
+        color: #1e40af; /* نص أزرق داكن */
+    }
+    [lang="en"] .ai-chat-message.user {
+        margin-left: auto;
+        margin-right: 0;
+    }
+    .ai-chat-message.ai {
+        background-color: #e2e8f0; /* gray-200 */
+        margin-left: auto;
+        margin-right: 0;
+        color: #475569; /* نص رمادي داكن */
+    }
+    [lang="en"] .ai-chat-message.ai {
+        margin-right: auto;
+        margin-left: 0;
+    }
+    .ai-chat-input-container {
+        display: flex;
+        padding: 0.8rem; /* مساحة داخلية أكبر */
+        border-top: 1px solid #e0e0e0;
+        background-color: #ffffff;
+    }
+    .ai-chat-input {
+        flex-grow: 1;
+        padding: 0.6rem 0.9rem; /* مساحة داخلية أكبر */
+        border: 1px solid #ccc;
+        border-radius: 0.75rem; /* زوايا دائرية أكثر */
+        margin-left: 0.6rem;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    [lang="en"] .ai-chat-input {
+        margin-right: 0.6rem;
+        margin-left: 0;
+    }
+    .ai-chat-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    .ai-chat-send-btn {
+        background-color: #2563eb;
+        color: white;
+        padding: 0.6rem 1.2rem; /* مساحة داخلية أكبر */
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ai-chat-send-btn:hover {
+        background-color: #1e40af;
+        transform: translateY(-1px);
+    }
+    .ai-chat-send-btn i {
+        font-size: 1.2rem;
+    }
+    .ai-chat-close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem; /* حجم أكبر لزر الإغلاق */
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+    }
+    .ai-chat-close-btn:hover {
+        transform: rotate(90deg); /* دوران عند التمرير */
+    }
+
+    /* أنماط نقاط التحميل */
+    .loading-dots span {
+        display: inline-block;
+        animation: blink 1.4s infinite ease-in-out;
+        animation-fill-mode: both;
+    }
+    .loading-dots span:nth-child(2) {
+        animation-delay: .2s;
+    }
+    .loading-dots span:nth-child(3) {
+        animation-delay: .4s;
+    }
+    @keyframes blink {
+        0%, 80%, 100% { opacity: 0; }
+        40% { opacity: 1; }
+    }
+
+    /* زر فتح مربع الدردشة AI */
+    .open-ai-chat-btn {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        background-color: #2563eb;
+        color: white;
+        padding: 1.2rem; /* حجم أكبر للزر */
+        border-radius: 50%; /* دائري تمامًا */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        z-index: 999; /* أقل من مربع الدردشة */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .open-ai-chat-btn:hover {
+        background-color: #1e40af;
+        transform: translateY(-3px) scale(1.05); /* رفع وتكبير خفيف */
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+    }
+    .open-ai-chat-btn i {
+        font-size: 2.2rem; /* حجم أيقونة أكبر */
+    }
+
+    /* تذييل الصفحة */
+    footer {
+        margin-top: 2rem;
+        padding-bottom: 1rem; /* مسافة سفلية إضافية */
+        font-size: 0.85rem;
+        color: #6b7280; /* لون رمادي أغمق قليلاً */
+    }
+
+    /* التجاوب لمربع الدردشة */
+    @media (max-width: 768px) {
+        .ai-chat-box {
+            width: 95%;
+            height: 75vh; /* ارتفاع نسبي أكبر */
+            bottom: 0.75rem;
+            right: 2.5%;
+            left: 2.5%;
+            border-radius: 1rem;
+        }
+        .open-ai-chat-btn {
+            bottom: 0.75rem;
+            right: 0.75rem;
+            padding: 1rem; /* تصغير حجم الزر قليلاً على الجوال */
+        }
+        .open-ai-chat-btn i {
+            font-size: 1.8rem;
+        }
+        .main-container {
+            padding: 1.5rem; /* تقليل المساحة الداخلية على الجوال */
+            border-radius: 1rem;
+        }
+        .action-btn {
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+        }
+        input[type="text"], select {
+            padding: 0.6rem 0.8rem;
+        }
+        .contact-icon-link {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.9rem;
+        }
+        .contact-icon-link i {
+            font-size: 1.3rem;
+        }
+    }
+
+    /* التجاوب للشاشات الصغيرة جداً */
+    @media (max-width: 480px) {
+        .ai-chat-box {
+            height: 80vh;
+        }
+        .main-container {
+            padding: 1rem;
+        }
+        .contact-card {
+            padding: 1.5rem;
+        }
+        .contact-icon-link {
+            flex-direction: column; /* الأيقونة والنص فوق بعضهما */
+            gap: 0.2rem;
+            padding: 0.5rem 1rem;
+        }
+        .contact-icon-link i {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            margin-bottom: 0.2rem;
+        }
+    }
+</style>
+
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md md:max-w-xl lg:max-w-2xl relative">
+        <!-- خيار مجلد التنزيل المخصص مع أيقونة معلومات -->
+        <div class="absolute top-4 left-4 flex items-center space-x-2 rtl:space-x-reverse">
+            <input type="checkbox" id="customFolderToggle" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+            <label for="customFolderToggle" class="text-gray-700 text-sm font-medium select-none" data-lang-key="custom_folder">مجلد مخصص</label>
+            <span class="tooltip text-gray-500 text-sm">
+                <i class="fas fa-info-circle"></i>
+                <span class="tooltiptext" data-lang-key="custom_folder_tooltip">سيتم تنزيل الفيديوهات في مجلد "MyVideoDownloads" داخل مجلد التنزيلات الافتراضي بجهازك. سيتم إنشاء المجلد إذا لم يكن موجودًا.</span>
+            </span>
+        </div>
+
+        <!-- زر تبديل اللغة -->
+        <div class="absolute top-4 right-4">
+            <button id="langToggleBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-3 rounded-lg text-sm transition duration-300 ease-in-out" data-lang-key="lang_toggle">English</button>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center text-blue-700 mb-6 mt-8" data-lang-key="app_title">برنامج تنزيل الفيديو</h1>
+
+        <!-- قسم إدخال الرابط -->
+        <div class="mb-4">
+            <label for="videoUrl" class="block text-gray-700 text-sm font-bold mb-2" data-lang-key="video_link_label">رابط الفيديو:</label>
+            <input type="text" id="videoUrl" placeholder="أدخل رابط الفيديو هنا..."
+                   class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500 transition duration-300 ease-in-out" data-lang-key="video_url_placeholder">
+        </div>
+
+        <button id="fetchInfoBtn"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full transition duration-300 ease-in-out btn-shadow" data-lang-key="fetch_info_btn">
+            جلب المعلومات
+        </button>
+
+        <!-- قسم معلومات الفيديو (مخفي مبدئيًا) -->
+        <div id="videoInfoSection" class="mt-6 p-4 border border-gray-200 rounded-lg hidden">
+            <h2 class="text-xl font-semibold mb-2 text-gray-800" data-lang-key="video_info_title">معلومات الفيديو:</h2>
+            <p class="text-gray-600 mb-2"><strong data-lang-key="title_label">العنوان:</strong> <span id="videoTitle"></span></p>
+            <p class="text-gray-600 mb-2"><strong data-lang-key="duration_label">المدة:</strong> <span id="videoDuration"></span></p>
+            <div class="mb-4">
+                <label for="formatSelect" class="block text-gray-700 text-sm font-bold mb-2" data-lang-key="format_label">الصيغة:</label>
+                <select id="formatSelect"
+                        class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500 transition duration-300 ease-in-out" disabled>
+                    </select>
+            </div>
+            <div class="mb-4">
+                <label for="qualitySelect" class="block text-gray-700 text-sm font-bold mb-2" data-lang-key="quality_label">الجودة:</label>
+                <select id="qualitySelect"
+                        class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500 transition duration-300 ease-in-out" disabled>
+                    </select>
+            </div>
+            <!-- Thumbnail with onerror to hide if invalid, and placeholder logic -->
+            <img id="videoThumbnail" src="" alt="صورة مصغرة للفيديو" class="w-full h-auto rounded-lg mt-4 hidden" onerror="this.src='https://placehold.co/400x225/f0f0f0/666666?text=No+Thumbnail'; this.style.display='block';">
+        </div>
+
+        <!-- زر التنزيل -->
+        <button id="downloadBtn"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-4 transition duration-300 ease-in-out btn-shadow hidden"
+                data-lang-key="download_btn" disabled>
+            تنزيل
+        </button>
+
+        <!-- زر إلغاء التحميل -->
+        <button id="cancelDownloadBtn"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-2 transition duration-300 ease-in-out btn-shadow hidden" data-lang-key="cancel_download_btn">
+            إلغاء التحميل
+        </button>
+
+        <!-- شريط التقدم وحالة التنزيل -->
+        <div class="mt-6 hidden" id="progressSection">
+            <div class="custom-progress-bar-container mb-2">
+                <div id="downloadProgressBarFill" class="custom-progress-bar-fill"></div>
+            </div>
+            <p id="statusMessage" class="text-center text-sm text-gray-600" data-lang-key="initial_status">الرجاء إدخال رابط الفيديو...</p>
+            <div class="flex flex-col md:flex-row justify-between text-sm text-gray-500 mt-2">
+                <span id="downloadSpeed" data-lang-key="speed_label">السرعة: N/A</span>
+                <span id="totalSize" data-lang-key="size_label">الحجم: N/A</span>
+                <span id="eta" data-lang-key="eta_label">الوقت المتبقي: N/A</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم معلومات التواصل الجديد -->
+    <div class="contact-card w-full max-w-md md:max-w-xl lg:max-w-2xl mt-8">
+        <h2 class="text-2xl font-bold text-blue-700 mb-6" data-lang-key="contact_us_label">للتواصل:</h2>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+            <a href="mailto:warden.zone.contact@gmail.com" class="contact-icon-link">
+                <span data-lang-key="email_label">البريد الإلكتروني</span>
+                <i class="fas fa-envelope"></i>
+            </a>
+            <a href="https://t.me/Drmino02" target="_blank" rel="noopener noreferrer" class="contact-icon-link">
+                <span data-lang-key="telegram_label">تليجرام</span>
+                <i class="fab fa-telegram-plane"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- تذييل الصفحة مع حقوق النشر و Powered by -->
+    <footer class="mt-8 text-center text-gray-600 text-xs">
+        <p data-lang-key="all_rights_reserved">جميع الحقوق محفوظة &copy; 2025</p>
+        <p data-lang-key="powered_by">Powered by EL_coder</p>
+    </footer>
+
+    <!-- مربع الدردشة AI -->
+    <div id="aiChatBox" class="ai-chat-box hidden">
+        <div class="ai-chat-header">
+            <span data-lang-key="ai_chat_title">الذكاء الاصطناعي</span>
+            <button id="aiChatCloseBtn" class="ai-chat-close-btn">&times;</button>
+        </div>
+        <div id="aiChatMessages" class="ai-chat-messages">
+            <!-- رسائل الدردشة هنا -->
+        </div>
+        <div class="ai-chat-input-container">
+            <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="اكتب رسالتك هنا..." data-lang-key="ai_input_placeholder">
+            <button id="aiChatSendBtn" class="ai-chat-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- زر فتح مربع الدردشة AI -->
+    <button id="openAiChatBtn" class="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-1000">
+        <i class="fas fa-robot text-2xl"></i>
+    </button>
+
+    <script>
+        // --- عناصر DOM الرئيسية ---
+        const videoUrlInput = document.getElementById('videoUrl');
+        const fetchInfoBtn = document.getElementById('fetchInfoBtn');
+        const videoInfoSection = document.getElementById('videoInfoSection');
+        const videoTitleSpan = document.getElementById('videoTitle');
+        const videoDurationSpan = document.getElementById('videoDuration');
+        const videoThumbnailImg = document.getElementById('videoThumbnail');
+        const formatSelect = document.getElementById('formatSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
+        const downloadProgressBarFill = document.getElementById('downloadProgressBarFill');
+        const statusMessage = document.getElementById('statusMessage');
+        const progressSection = document.getElementById('progressSection');
+        const downloadSpeedSpan = document.getElementById('downloadSpeed');
+        const totalSizeSpan = document.getElementById('totalSize');
+        const etaSpan = document.getElementById('eta');
+        const customFolderToggle = document.getElementById('customFolderToggle');
+        const langToggleBtn = document.getElementById('langToggleBtn');
+
+        // عناصر الدردشة AI
+        const aiChatBox = document.getElementById('aiChatBox');
+        const aiChatMessages = document.getElementById('aiChatMessages');
+        const aiChatInput = document.getElementById('aiChatInput');
+        const aiChatSendBtn = document.getElementById('aiChatSendBtn');
+        const aiChatCloseBtn = document.getElementById('aiChatCloseBtn');
+        const openAiChatBtn = document.getElementById('openAiChatBtn');
+
+
+        // --- المتغيرات العامة ---
+        let videoInfo = null;
+        let ws = null;
+        let clientId = null;
+        let currentLang = 'ar';
+        let chatHistory = []; // سجل الدردشة للذكاء الاصطناعي
+        // مفتاح Gemini API - يرجى ملاحظة أن هذا ليس آمناً في الإنتاج.
+        const GEMINI_API_KEY = "AIzaSyDWqs8Fxw--ciyrFyR9XPzFikn7rQPqD5k"; 
+
+
+        // --- قاموس الترجمات ---
+        const translations = {
+            'ar': {
+                'app_title_short': 'تنزيل الفيديو',
+                'custom_folder': 'مجلد مخصص',
+                'custom_folder_tooltip': 'سيتم تنزيل الفيديوهات في مجلد "MyVideoDownloads" داخل مجلد التنزيلات الافتراضي بجهازك. سيتم إنشاء المجلد إذا لم يكن موجودًا.',
+                'lang_toggle': 'English',
+                'app_title': 'برنامج تنزيل الفيديو',
+                'video_link_label': 'رابط الفيديو:',
+                'video_url_placeholder': 'أدخل رابط الفيديو هنا...',
+                'fetch_info_btn': 'جلب المعلومات',
+                'video_info_title': 'معلومات الفيديو:',
+                'title_label': 'العنوان:',
+                'duration_label': 'المدة:',
+                'format_label': 'الصيغة:',
+                'select_format_option': 'اختر صيغة',
+                'quality_label': 'الجودة:',
+                'select_quality_option': 'اختر جودة',
+                'download_btn': 'تنزيل',
+                'cancel_download_btn': 'إلغاء التحميل',
+                'initial_status': 'الرجاء إدخال رابط الفيديو...',
+                'speed_label': 'السرعة: N/A',
+                'size_label': 'الحجم: N/A',
+                'eta_label': 'الوقت المتبقي: N/A',
+                'contact_us_label': 'للتواصل:',
+                'email_label': 'البريد الإلكتروني',
+                'telegram_label': 'تليجرام',
+                'enter_valid_url': 'الرجاء إدخال رابط فيديو صالح.',
+                'fetching_info': 'جاري جلب معلومات الفيديو...',
+                'info_fetched_success': 'تم جلب المعلومات بنجاح. اختر الصيغة والجودة.',
+                'fetch_error': 'خطأ: {detail} || تعذر جلب معلومات الفيديو.',
+                'connection_error': 'خطأ في الاتصال: {message}',
+                'enter_format_quality': 'الرجاء إدخال رابط الفيديو واختيار الصيغة والجودة.',
+                'starting_download': 'بدء التنزيل...',
+                'downloading_progress': 'جاري التنزيل: {progress}%',
+                'download_success': 'تم التنزيل بنجاح!',
+                'download_error': 'خطأ في التنزيل: {message} || حدث خطأ غير متوقع.',
+                'websocket_closed': 'انقطع اتصال التنزيل.',
+                'parsing_error': 'خطأ في معالجة بيانات التنزيل.',
+                'download_to_custom_folder': 'تم تنزيل الفيديو بنجاح إلى مجلد "MyVideoDownloads" في تنزيلات جهازك.',
+                'no_qualities_available': 'لا توجد جودات متاحة',
+                'no_formats_available': 'لا توجد صيغ متاحة',
+                'title_unavailable': 'عنوان غير متاح',
+                'duration_unavailable': 'غير متاح',
+                'all_rights_reserved': 'جميع الحقوق محفوظة &copy; 2025',
+                'powered_by': 'Powered by EL_coder',
+                'فيديو + صوت': 'فيديو + صوت (MP4)',
+                'فيديو فقط': 'فيديو فقط (MP4 - بدون صوت)',
+                'صوت فقط': 'صوت فقط (MP3)',
+                'ai_chat_title': 'الذكاء الاصطناعي',
+                'ai_input_placeholder': 'اكتب رسالتك هنا...',
+                'ai_loading': 'جاري الكتابة...'
+            },
+            'en': {
+                'app_title_short': 'Video Downloader',
+                'custom_folder': 'Custom Folder',
+                'custom_folder_tooltip': 'Videos will be downloaded to a "MyVideoDownloads" folder inside your device\'s default Downloads directory. The folder will be created if it doesn\'t exist.',
+                'lang_toggle': 'العربية',
+                'app_title': 'Video Downloader Program',
+                'video_link_label': 'Video Link:',
+                'video_url_placeholder': 'Enter video link here...',
+                'fetch_info_btn': 'Fetch Info',
+                'video_info_title': 'Video Information:',
+                'title_label': 'Title:',
+                'duration_label': 'Duration:',
+                'format_label': 'Format:',
+                'select_format_option': 'Select format',
+                'quality_label': 'Quality:',
+                'select_quality_option': 'Select quality',
+                'download_btn': 'Download',
+                'cancel_download_btn': 'Cancel Download',
+                'initial_status': 'Please enter video link...',
+                'speed_label': 'Speed: N/A',
+                'size_label': 'Size: N/A',
+                'eta_label': 'Time Left: N/A',
+                'contact_us_label': 'Contact Us:',
+                'email_label': 'Email',
+                'telegram_label': 'Telegram',
+                'enter_valid_url': 'Please enter a valid video link.',
+                'fetching_info': 'Fetching video information...',
+                'info_fetched_success': 'Info fetched successfully. Choose format and quality.',
+                'fetch_error': 'Error: {detail} || Could not fetch video information.',
+                'connection_error': 'Connection error: {message}',
+                'enter_format_quality': 'Please enter video link and select format and quality.',
+                'starting_download': 'Starting download...',
+                'downloading_progress': 'Downloading: {progress}%',
+                'download_success': 'Download complete!',
+                'download_error': 'Error: {message} || An unexpected error occurred.',
+                'websocket_closed': 'Download connection interrupted.',
+                'parsing_error': 'Error processing download data.',
+                'download_to_custom_folder': 'Video downloaded successfully to "MyVideoDownloads" folder in your device\'s downloads.',
+                'no_qualities_available': 'No qualities available',
+                'no_formats_available': 'No formats available',
+                'title_unavailable': 'Title unavailable',
+                'duration_unavailable': 'N/A',
+                'all_rights_reserved': 'All rights reserved &copy; 2025',
+                'powered_by': 'Powered by EL_coder',
+                'فيديو + صوت': 'Video + Audio (MP4)',
+                'فيديو فقط': 'Video Only (MP4 - No Audio)',
+                'صوت فقط': 'Audio Only (MP3)'
+            }
+        };
+
+        // قاموس لتحديد مؤشرات الجودة
+        const qualityIndicators = {
+            'ar': {
+                '144p': ' (جودة منخفضة)',
+                '240p': ' (جودة قياسية)',
+                '360p': ' (جودة قياسية)',
+                '480p': ' (جودة قياسية)',
+                '720p': ' (HD)',
+                '1080p': ' (Full HD)',
+                '1440p': ' (2K)',
+                '2160p': ' (4K)',
+                '4320p': ' (8K)',
+                '60fps': ' (60 إطار/ثانية)',
+                '128k': ' (صوت قياسي)',
+                '192k': ' (صوت عالي)',
+                '256k': ' (صوت ممتاز)',
+                '320k': ' (صوت فائق)'
+            },
+            'en': {
+                '144p': ' (Low Quality)',
+                '240p': ' (Standard Quality)',
+                '360p': ' (Standard Quality)',
+                '480p': ' (Standard Quality)',
+                '720p': ' (HD)',
+                '1080p': ' (Full HD)',
+                '1440p': ' (2K)',
+                '2160p': ' (4K)',
+                '4320p': ' (8K)',
+                '60fps': ' (60fps)',
+                '128k': ' (Standard Audio)',
+                '192k': ' (High Audio)',
+                '256k': ' (Premium Audio)',
+                '320k': ' (Ultra Audio)'
+            }
+        };
+
+        // دالة لتحويل الثواني إلى تنسيق HH:MM:SS أو Xh Ym Zs
+        function formatDuration(seconds, lang) {
+            if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) {
+                return translations[lang]['duration_unavailable'];
+            }
+
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+
+            let parts = [];
+            if (h > 0) {
+                parts.push(`${h}${lang === 'ar' ? ' ساعة' : 'h'}`);
+            }
+            if (m > 0 || h > 0) {
+                parts.push(`${m}${lang === 'ar' ? ' دقيقة' : 'm'}`);
+            }
+            if (s > 0 || (h === 0 && m === 0)) {
+                parts.push(`${s}${lang === 'ar' ? ' ثانية' : 's'}`);
+            }
+            
+            return parts.join(' ');
+        }
+
+        // دالة لتطبيق الترجمات على جميع العناصر
+        function applyTranslations(lang) {
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                let text = translations[lang][key];
+
+                if (key === 'video_url_placeholder' || key === 'ai_input_placeholder') {
+                    element.placeholder = text;
+                } else if (key === 'lang_toggle') {
+                    element.textContent = text;
+                } else {
+                    element.textContent = text;
+                }
+            });
+            document.documentElement.lang = lang;
+            document.body.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
+            document.body.style.textAlign = (lang === 'ar') ? 'right' : 'left';
+
+            updateDropdownOptionsLanguage();
+            if (videoInfo && videoInfo.duration) {
+                videoDurationSpan.textContent = formatDuration(videoInfo.duration, currentLang);
+            }
+        }
+
+        // دالة لتحديث لغة خيارات القوائم المنسدلة
+        function updateDropdownOptionsLanguage() {
+            const formatOption = formatSelect.querySelector('option[value=""]');
+            if (formatOption) {
+                formatOption.textContent = translations[currentLang]['select_format_option'];
+            }
+            const qualityOption = qualitySelect.querySelector('option[value=""]');
+            if (qualityOption) {
+                qualityOption.textContent = translations[currentLang]['select_quality_option'];
+            }
+            const noFormatsOption = formatSelect.querySelector('option[disabled][value=""]');
+            if (noFormatsOption) {
+                noFormatsOption.textContent = translations[currentLang]['no_formats_available'];
+            }
+            const noQualitiesOption = qualitySelect.querySelector('option[disabled][value=""]');
+            if (noQualitiesOption) {
+                noQualitiesOption.textContent = translations[currentLang]['no_qualities_available'];
+            }
+
+            if (videoInfo && videoInfo.available_formats) {
+                const currentSelectedFormat = formatSelect.value;
+                formatSelect.innerHTML = `<option value="">${translations[currentLang]['select_format_option']}</option>`;
+                if (Object.keys(videoInfo.available_formats).length === 0) {
+                    formatSelect.innerHTML += `<option value="" disabled>${translations[currentLang]['no_formats_available']}</option>`;
+                } else {
+                    for (const formatType in videoInfo.available_formats) {
+                        const option = document.createElement('option');
+                        option.value = formatType;
+                        option.textContent = translations[currentLang][formatType] || formatType;
+                        formatSelect.appendChild(option);
+                    }
+                }
+                formatSelect.value = currentSelectedFormat;
+
+                const currentSelectedQuality = qualitySelect.value;
+                const selectedFormatType = formatSelect.value;
+                qualitySelect.innerHTML = `<option value="">${translations[currentLang]['select_quality_option']}</option>`;
+                if (selectedFormatType && videoInfo.available_formats[selectedFormatType]) {
+                    const qualities = videoInfo.available_formats[selectedFormatType];
+                    if (qualities.length === 0) {
+                        qualitySelect.innerHTML += `<option value="" disabled>${translations[currentLang]['no_qualities_available']}</option>`;
+                    } else {
+                        qualities.forEach(q => {
+                            const option = document.createElement('option');
+                            option.value = q;
+                            option.textContent = q + (qualityIndicators[currentLang][q] || '');
+                            qualitySelect.appendChild(option);
+                        });
+                    }
+                } else {
+                    qualitySelect.innerHTML += `<option value="" disabled>${translations[currentLang]['no_qualities_available']}</option>`;
+                }
+                qualitySelect.value = currentSelectedQuality;
+            }
+        }
+
+
+        langToggleBtn.addEventListener('click', () => {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            applyTranslations(currentLang);
+        });
+
+        function generateClientId() {
+            return 'client-' + Math.random().toString(36).substr(2, 9) + Date.now();
+        }
+        clientId = generateClientId();
+
+        // --- وظائف التحكم في حالة واجهة المستخدم ---
+        function resetDownloadUI() {
+            videoUrlInput.value = '';
+            videoInfo = null;
+            videoInfoSection.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+            downloadBtn.disabled = true;
+            cancelDownloadBtn.classList.add('hidden');
+            progressSection.classList.add('hidden');
+            downloadProgressBarFill.style.width = '0%';
+            statusMessage.textContent = translations[currentLang]['initial_status'];
+            statusMessage.style.color = 'gray';
+            downloadSpeedSpan.textContent = translations[currentLang]['speed_label'];
+            totalSizeSpan.textContent = translations[currentLang]['size_label'];
+            etaSpan.textContent = translations[currentLang]['eta_label'];
+            videoThumbnailImg.style.display = 'none';
+
+            formatSelect.innerHTML = `<option value="">${translations[currentLang]['select_format_option']}</option>`;
+            formatSelect.disabled = true;
+            qualitySelect.innerHTML = `<option value="">${translations[currentLang]['select_quality_option']}</option>`;
+            qualitySelect.disabled = true;
+            updateDropdownOptionsLanguage();
+        }
+
+        // --- ربط أحداث جلب المعلومات والتنزيل ---
+        fetchInfoBtn.addEventListener('click', async () => {
+            console.log("Fetch Info button clicked.");
+            const url = videoUrlInput.value.trim();
+            if (!url) {
+                statusMessage.textContent = translations[currentLang]['enter_valid_url'];
+                statusMessage.style.color = 'red';
+                console.error("URL input is empty.");
+                return;
+            }
+
+            statusMessage.textContent = translations[currentLang]['fetching_info'];
+            statusMessage.style.color = 'blue';
+            progressSection.classList.remove('hidden');
+            downloadProgressBarFill.style.width = '0%';
+
+            fetchInfoBtn.disabled = true;
+            downloadBtn.disabled = true;
+            cancelDownloadBtn.classList.add('hidden');
+
+            videoInfoSection.classList.add('hidden');
+            videoThumbnailImg.style.display = 'none';
+
+
+            try {
+                const response = await fetch('/api/info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    videoInfo = data;
+                    videoTitleSpan.textContent = data.title || translations[currentLang]['title_unavailable'];
+                    videoDurationSpan.textContent = formatDuration(data.duration, currentLang);
+                    
+                    if (data.thumbnail) {
+                        videoThumbnailImg.src = data.thumbnail;
+                        videoThumbnailImg.classList.remove('hidden');
+                        videoThumbnailImg.style.display = 'block';
+                    } else {
+                        videoThumbnailImg.src = 'https://placehold.co/400x225/f0f0f0/666666?text=No+Thumbnail';
+                        videoThumbnailImg.classList.remove('hidden');
+                        videoThumbnailImg.style.display = 'block';
+                    }
+
+                    formatSelect.innerHTML = `<option value="">${translations[currentLang]['select_format_option']}</option>`;
+                    if (Object.keys(data.available_formats).length === 0) {
+                        formatSelect.innerHTML += `<option value="" disabled>${translations[currentLang]['no_formats_available']}</option>`;
+                        formatSelect.disabled = true;
+                    } else {
+                        for (const formatType in data.available_formats) {
+                            const option = document.createElement('option');
+                            option.value = formatType;
+                            option.textContent = translations[currentLang][formatType] || formatType;
+                            formatSelect.appendChild(option);
+                        }
+                        formatSelect.disabled = false;
+                    }
+                    qualitySelect.innerHTML = `<option value="">${translations[currentLang]['select_quality_option']}</option>`;
+                    qualitySelect.disabled = true;
+                    
+                    updateDropdownOptionsLanguage();
+
+
+                    videoInfoSection.classList.remove('hidden');
+                    // زر التنزيل سيتم تمكينه بواسطة formatSelect.addEventListener أو qualitySelect.addEventListener
+                    statusMessage.textContent = translations[currentLang]['info_fetched_success'];
+                    statusMessage.style.color = 'green';
+                } else {
+                    statusMessage.textContent = translations[currentLang]['fetch_error'].replace('{detail}', data.detail || '');
+                    statusMessage.style.color = 'red';
+                    videoInfo = null;
+                }
+            } catch (error) {
+                statusMessage.textContent = translations[currentLang]['connection_error'].replace('{message}', error.message);
+                statusMessage.style.color = 'red';
+                videoInfo = null;
+            } finally {
+                fetchInfoBtn.disabled = false;
+            }
+        });
+
+        formatSelect.addEventListener('change', () => {
+            console.log("Format selected changed. Value:", formatSelect.value);
+            const selectedFormatType = formatSelect.value;
+            qualitySelect.innerHTML = `<option value="">${translations[currentLang]['select_quality_option']}</option>`;
+            qualitySelect.disabled = true;
+
+            if (selectedFormatType && videoInfo && videoInfo.available_formats[selectedFormatType]) {
+                const qualities = videoInfo.available_formats[selectedFormatType];
+                if (qualities.length === 0) {
+                    qualitySelect.innerHTML += `<option value="" disabled>${translations[currentLang]['no_qualities_available']}</option>`;
+                } else {
+                    qualities.forEach(q => {
+                        const option = document.createElement('option');
+                        option.value = q;
+                        option.textContent = q + (qualityIndicators[currentLang][q] || '');
+                        qualitySelect.appendChild(option);
+                    });
+                }
+                qualitySelect.disabled = false;
+            } else {
+                 qualitySelect.innerHTML += `<option value="" disabled>${translations[currentLang]['no_qualities_available']}</option>`;
+            }
+            updateDropdownOptionsLanguage();
+            
+            if (formatSelect.value && qualitySelect.value && qualitySelect.value !== translations[currentLang]['select_quality_option']) {
+                downloadBtn.classList.remove('hidden');
+                downloadBtn.disabled = false;
+            } else {
+                downloadBtn.classList.add('hidden');
+                downloadBtn.disabled = true;
+            }
+        });
+
+        qualitySelect.addEventListener('change', () => {
+            console.log("Quality selected changed. Value:", qualitySelect.value);
+            if (formatSelect.value && qualitySelect.value && qualitySelect.value !== translations[currentLang]['select_quality_option']) {
+                downloadBtn.classList.remove('hidden');
+                downloadBtn.disabled = false;
+            } else {
+                downloadBtn.classList.add('hidden');
+                downloadBtn.disabled = true;
+            }
+        });
+
+        downloadBtn.addEventListener('click', async () => {
+            console.log("Download button clicked. Initiating download process.");
+            const url = videoUrlInput.value.trim();
+            const formatType = formatSelect.value;
+            const quality = qualitySelect.value;
+            const useCustomFolder = customFolderToggle.checked;
+
+            if (!url || !formatType || !quality) {
+                statusMessage.textContent = translations[currentLang]['enter_format_quality'];
+                statusMessage.style.color = 'red';
+                console.error("Missing URL, format, or quality. Cannot proceed with download.");
+                return;
+            }
+            if (!videoInfo || !videoInfo.original_filename) {
+                statusMessage.textContent = "Video info not available. Please fetch info first.";
+                statusMessage.style.color = 'red';
+                console.error("videoInfo or original_filename is missing. Fetch info first.");
+                return;
+            }
+
+
+            statusMessage.textContent = translations[currentLang]['starting_download'];
+            statusMessage.style.color = 'blue';
+            fetchInfoBtn.disabled = true;
+            downloadBtn.disabled = true;
+            cancelDownloadBtn.classList.remove('hidden');
+            progressSection.classList.remove('hidden');
+            downloadProgressBarFill.style.width = '0%';
+            downloadSpeedSpan.textContent = translations[currentLang]['speed_label'];
+            totalSizeSpan.textContent = translations[currentLang]['size_label'];
+            etaSpan.textContent = translations[currentLang]['eta_label'];
+
+            if (ws) {
+                ws.close();
+            }
+            ws = new WebSocket(`ws://${window.location.host}/ws/progress/${clientId}`);
+
+            ws.onopen = () => {
+                console.log('WebSocket connection established. Sending download request.');
+                sendDownloadRequest(url, formatType, quality, useCustomFolder, videoInfo.original_filename);
+            };
+
+            ws.onmessage = (event) => {
+                console.log('Received WebSocket message:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Parsed WebSocket data:', data);
+
+                    if (data.status === 'downloading') {
+                        downloadProgressBarFill.style.width = `${data.progress}%`;
+                        
+                        statusMessage.textContent = translations[currentLang]['downloading_progress'].replace('{progress}', data.progress);
+                        downloadSpeedSpan.textContent = `${translations[currentLang]['speed_label'].split(':')[0]}: ${data.speed}`;
+                        totalSizeSpan.textContent = `${translations[currentLang]['size_label'].split(':')[0]}: ${data.total_size}`;
+                        etaSpan.textContent = `${translations[currentLang]['eta_label'].split(':')[0]}: ${formatDuration(data.eta, currentLang)}`;
+                    } else if (data.status === 'finished') {
+                        downloadProgressBarFill.style.width = '100%';
+                        statusMessage.textContent = translations[currentLang]['download_success'];
+                        statusMessage.style.color = 'green';
+                        downloadSpeedSpan.textContent = translations[currentLang]['speed_label'];
+                        totalSizeSpan.textContent = translations[currentLang]['size_label'];
+                        etaSpan.textContent = translations[currentLang]['eta_label'];
+
+                        if (useCustomFolder) {
+                            statusMessage.textContent = translations[currentLang]['download_to_custom_folder'];
+                        }
+                        fetchInfoBtn.disabled = false;
+                        downloadBtn.disabled = false;
+                        cancelDownloadBtn.classList.add('hidden');
+                        ws.close();
+                    } else if (data.status === 'error') {
+                        statusMessage.textContent = translations[currentLang]['download_error'].replace('{message}', data.message || '');
+                        statusMessage.style.color = 'red';
+                        fetchInfoBtn.disabled = false;
+                        downloadBtn.disabled = false;
+                        cancelDownloadBtn.classList.add('hidden');
+                        ws.close();
+                    }
+                } catch (e) {
+                    console.error('Error parsing WebSocket message:', e, event.data);
+                    statusMessage.textContent = translations[currentLang]['parsing_error'];
+                    statusMessage.style.color = 'red';
+                    if (ws) ws.close();
+                }
+            };
+
+            ws.onclose = (event) => {
+                console.log('WebSocket connection closed:', event.code, event.reason);
+                if (parseFloat(downloadProgressBarFill.style.width) < 100 && statusMessage.style.color !== 'red' && statusMessage.style.color !== 'green') {
+                    statusMessage.textContent = translations[currentLang]['websocket_closed'];
+                    statusMessage.style.color = 'orange';
+                }
+                fetchInfoBtn.disabled = false;
+                downloadBtn.disabled = false;
+                cancelDownloadBtn.classList.add('hidden');
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                statusMessage.textContent = translations[currentLang]['connection_error'].replace('{message}', error.message || '');
+                statusMessage.style.color = 'red';
+                if (ws) ws.close();
+            }
+        });
+
+        cancelDownloadBtn.addEventListener('click', () => {
+            console.log("Cancel button clicked.");
+            if (ws) {
+                ws.close();
+                statusMessage.textContent = translations[currentLang]['websocket_closed'];
+                statusMessage.style.color = 'orange';
+                downloadProgressBarFill.style.width = '0%';
+                fetchInfoBtn.disabled = false;
+                downloadBtn.disabled = false;
+                cancelDownloadBtn.classList.add('hidden');
+                console.log('Download cancelled by user.');
+            }
+        });
+
+        async function sendDownloadRequest(url, formatType, quality, useCustomFolder, originalFileName) {
+            console.log("sendDownloadRequest called.");
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: url, format_type: formatType, quality: quality,
+                        client_id: clientId, use_custom_folder: useCustomFolder, file_name: originalFileName
+                    })
+                });
+                console.log("Response from /api/download:", response);
+
+                if (response.ok) {
+                    if (!useCustomFolder) {
+                        const blob = await response.blob();
+                        const contentDisposition = response.headers.get('Content-Disposition');
+                        let filename = originalFileName ? `${originalFileName}.mp4` : 'download.mp4';
+
+                        if (contentDisposition) {
+                            const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
+                            if (filenameMatch && filenameMatch[1]) {
+                                filename = filenameMatch[1];
+                            }
+                        }
+
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        if (ws) ws.close();
+                        statusMessage.textContent = translations[currentLang]['download_success'];
+                        statusMessage.style.color = 'green';
+                        downloadProgressBarFill.style.width = '100%';
+                        fetchInfoBtn.disabled = false;
+                        downloadBtn.disabled = false;
+                        cancelDownloadBtn.classList.add('hidden');
+
+                    } else {
+                        const data = await response.json();
+                        console.log("Custom folder download response data:", data);
+                        // حالة النجاح سيتم التعامل معها بواسطة WebSocket (رسالة "finished")
+                    }
+                } else {
+                    const errorData = await response.json();
+                    statusMessage.textContent = translations[currentLang]['download_error'].replace('{message}', errorData.detail || '');
+                    statusMessage.style.color = 'red';
+                    fetchInfoBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                    cancelDownloadBtn.classList.add('hidden');
+                    if (ws) ws.close();
+                }
+            } catch (error) {
+                statusMessage.textContent = translations[currentLang]['connection_error'].replace('{message}', error.message);
+                statusMessage.style.color = 'red';
+                fetchInfoBtn.disabled = false;
+                downloadBtn.disabled = false;
+                cancelDownloadBtn.classList.add('hidden');
+                if (ws) ws.close();
+            }
+        }
+
+        // --- وظائف الدردشة AI ---
+        function appendMessage(sender, text) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('ai-chat-message', sender);
+            messageElement.textContent = text;
+            aiChatMessages.appendChild(messageElement);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight; // التمرير لأسفل تلقائيًا
+        }
+
+        async function sendMessageToAI() {
+            const message = aiChatInput.value.trim();
+            if (!message) return;
+
+            appendMessage('user', message);
+            chatHistory.push({ role: 'user', text: message });
+            aiChatInput.value = ''; // مسح حقل الإدخال
+
+            // إظهار مؤشر التحميل
+            const loadingMessageElement = document.createElement('div');
+            loadingMessageElement.classList.add('ai-chat-message', 'ai');
+            loadingMessageElement.innerHTML = `<span class="loading-dots">${translations[currentLang]['ai_loading']}<span>.</span><span>.</span><span>.</span></span>`;
+            aiChatMessages.appendChild(loadingMessageElement);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+
+            try {
+                const payload = {
+                    message: message,
+                    chat_history: chatHistory.map(msg => ({ role: msg.role, text: msg.text }))
+                };
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                // إزالة مؤشر التحميل
+                aiChatMessages.removeChild(loadingMessageElement);
+
+                if (response.ok) {
+                    const aiResponse = data.response;
+                    appendMessage('ai', aiResponse);
+                    chatHistory.push({ role: 'model', text: aiResponse });
+                } else {
+                    appendMessage('ai', `خطأ: ${data.detail || 'حدث خطأ في الذكاء الاصطناعي.'}`);
+                }
+            } catch (error) {
+                // إزالة مؤشر التحميل
+                aiChatMessages.removeChild(loadingMessageElement);
+                appendMessage('ai', `خطأ في الاتصال بالذكاء الاصطناعي: ${error.message}`);
+                console.error('AI chat error:', error);
+            }
+        }
+
+        // ربط أحداث مربع الدردشة AI
+        aiChatSendBtn.addEventListener('click', sendMessageToAI);
+        aiChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessageToAI();
+            }
+        });
+
+        openAiChatBtn.addEventListener('click', () => {
+            aiChatBox.classList.toggle('hidden');
+            if (!aiChatBox.classList.contains('hidden')) {
+                aiChatMessages.scrollTop = aiChatMessages.scrollHeight; // التمرير لأسفل عند الفتح
+                aiChatInput.focus(); // التركيز على حقل الإدخال
+            }
+        });
+
+        aiChatCloseBtn.addEventListener('click', () => {
+            aiChatBox.classList.add('hidden');
+        });
+
+        // --- تهيئة التطبيق عند التحميل ---
+        applyTranslations(currentLang); // تطبيق الترجمات الأولية
+        resetDownloadUI(); // إعادة تعيين واجهة التنزيل
+
+    </script>
+</body>
+</html>
