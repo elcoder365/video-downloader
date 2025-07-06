@@ -1,9 +1,0 @@
-{
-  "name": "video-downloader",
-  "micros": {
-    "web": {
-      "src": ".",
-      "entrypoint": "python3 main.py"
-    }
-  }
-}
