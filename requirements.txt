@@ -142,4 +142,9 @@ yarl==1.18.3
 yt-dlp==2025.6.25
 fastapi
 uvicorn
+fastapi
+uvicorn
+yt-dlp
+jinja2
+
 
